@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from .models import ParkingLocation, ParkingSlot, Reservation
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -118,7 +119,16 @@ class ReservationSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'user_email', 'parking_slot', 'location_name', 
                  'slot_number', 'start_time', 'end_time', 'status', 
                  'can_be_cancelled', 'created_at', 'updated_at')
-        read_only_fields = ('id', 'user', 'status', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'user', 'created_at', 'updated_at')
+
+    def validate_status(self, value):
+        """Validate status changes."""
+        instance = getattr(self, 'instance', None)
+        if instance and instance.status == 'COMPLETED':
+            raise serializers.ValidationError(
+                "Cannot change status of a completed reservation."
+            )
+        return value
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating reservations."""
