@@ -138,28 +138,49 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         fields = ('parking_slot', 'start_time', 'end_time')
 
     def validate(self, attrs):
-        start_time = attrs['start_time']
-        end_time = attrs['end_time']
-        parking_slot = attrs['parking_slot']
-        
-        # Validate time range
-        if start_time >= end_time:
-            raise serializers.ValidationError(
-                {"end_time": "End time must be after start time."}
-            )
-        
-        # Check if slot is available for the time range
-        if Reservation.objects.filter(
-            parking_slot=parking_slot,
-            status__in=['PENDING', 'CONFIRMED'],
-            start_time__lt=end_time,
-            end_time__gt=start_time
-        ).exists():
-            raise serializers.ValidationError(
-                {"parking_slot": "This slot is already reserved for the selected time period."}
-            )
-        
-        return attrs
+        try:
+            start_time = attrs['start_time']
+            end_time = attrs['end_time']
+            parking_slot = attrs['parking_slot']
+            
+            # Validate time range
+            if start_time >= end_time:
+                raise serializers.ValidationError(
+                    {"end_time": "End time must be after start time."}
+                )
+            
+            # Validate that start time is in the future
+            if start_time <= timezone.now():
+                raise serializers.ValidationError(
+                    {"start_time": "Start time must be in the future."}
+                )
+            
+            # Check if slot exists and is available
+            try:
+                slot = ParkingSlot.objects.get(id=parking_slot.id)
+                if slot.is_occupied or slot.is_reserved:
+                    raise serializers.ValidationError(
+                        {"parking_slot": "This slot is currently occupied or reserved."}
+                    )
+            except ParkingSlot.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"parking_slot": "Invalid parking slot."}
+                )
+            
+            # Check if slot is available for the time range
+            if Reservation.objects.filter(
+                parking_slot=parking_slot,
+                status__in=['PENDING', 'CONFIRMED'],
+                start_time__lt=end_time,
+                end_time__gt=start_time
+            ).exists():
+                raise serializers.ValidationError(
+                    {"parking_slot": "This slot is already reserved for the selected time period."}
+                )
+            
+            return attrs
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
 
 class ReservationUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating reservations (admin only)."""
