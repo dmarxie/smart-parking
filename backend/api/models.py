@@ -154,6 +154,10 @@ class Reservation(models.Model):
 
     def save(self, *args, **kwargs):
         """Override save to handle reservation status."""
+        is_new = self._state.adding
+        if is_new:
+            self.created_at = timezone.now()
+            
         if self.status == self.Status.PENDING:
             # Check if reservation is expired
             expiry_time = self.created_at + timedelta(minutes=settings.RESERVATION_EXPIRY_MINUTES)
