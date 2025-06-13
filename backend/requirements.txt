@@ -1,0 +1,26 @@
+# Django and REST Framework
+Django==5.0.2
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# Authentication
+djangorestframework-simplejwt==5.3.1
+
+# Database
+django-filter==23.5
+
+# Development Tools
+python-dotenv==1.0.1
+django-debug-toolbar==4.3.0
+
+# API Documentation
+drf-yasg==1.21.7
+
+# Testing
+pytest==8.0.0
+pytest-django==4.8.0
+
+# Code Quality
+black==24.1.1
+flake8==7.0.0
+isort==5.13.2
