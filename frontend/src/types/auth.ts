@@ -13,7 +13,9 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface RegisterData extends LoginCredentials {
+export interface RegisterData {
+  email: string;
+  password: string;
   password2: string;
   first_name: string;
   last_name: string;
@@ -23,4 +25,4 @@ export interface RegisterData extends LoginCredentials {
 export interface AuthResponse {
   access: string;
   refresh: string;
-} 
+}
