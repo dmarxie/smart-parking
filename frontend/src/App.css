@@ -19,49 +19,21 @@ html,
   background-color: #030303;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
 .App {
-  max-height: 100%;
+  max-height: 100vh;
   max-width: 100%;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   color: #ffffff;
   padding: 24px;
+}
+
+.auth-footer {
+  display: flex;
+  flex-direction: row;
+  margin-top: 16px;
+  gap: 8px;
+  justify-content: center;
 }
 
 .homepage {
@@ -87,14 +59,36 @@ html,
   justify-content: flex-end;
 }
 
+.login-form {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  border-radius: 24px;
+  color: white;
+}
+
+.register-form {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  border-radius: 24px;
+  color: white;
+}
+
+.text-subtitle-gray {
+  color: #a0a0a0;
+}
+
+.text-underline-hover {
+  text-decoration: none;
+}
+
+.text-underline-hover:hover {
+  text-decoration: underline;
+}
+
 .welcome-title {
   color: #ffffff;
   font-size: 58px;
   font-weight: 600;
-}
-
-.welcome-subtitle {
-  color: #a0a0a0;
 }
 
 /* Button styles */
@@ -122,6 +116,13 @@ html,
   transform: translateY(-2px);
 }
 
+@media (max-width: 576px) {
+  .auth-footer {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding-left: 15px;
@@ -130,7 +131,13 @@ html,
 }
 
 @media (max-width: 992px) {
+  .homepage {
+    display: flex;
+  }
   .homepage-image {
     display: none;
+  }
+  .welcome-title {
+    font-size: 38px;
   }
 }
