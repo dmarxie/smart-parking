@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { AdminLoginPage, HomePage, LoginPage } from './pages';
+import './styles/custom.scss';
 import './App.css';
 
-// Create a client for React Query
 const queryClient = new QueryClient();
 
 function App() {
@@ -14,8 +14,9 @@ function App() {
         <Router>
           <div className="App">
             <Routes>
-              {/* We'll add routes here */}
-              <Route path="/" element={<div>Home Page</div>} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
             </Routes>
           </div>
         </Router>
