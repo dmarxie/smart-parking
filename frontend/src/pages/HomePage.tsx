@@ -4,6 +4,7 @@ import homepageImage from '../assets/images/homepage-bg.png';
 
 /**
  * Homepage component
+ *
  * @returns Homepage component
  */
 export function HomePage() {
@@ -14,7 +15,9 @@ export function HomePage() {
       <Image src={homepageImage} alt="Car Image" className="homepage-image" />
       <Container className="p-4 h-100 d-flex flex-column">
         <h1 className="welcome-title mb-2">Welcome to Navipark</h1>
-        <p className="welcome-subtitle lead mb-5">Your hassle-free parking solution starts here.</p>
+        <p className="text-subtitle-gray lead mb-5">
+          Your hassle-free parking solution starts here.
+        </p>
 
         <Container className="homepage--login-options-container px-0 pt-5">
           <h3 className="text-white">Who's logging in?</h3>
