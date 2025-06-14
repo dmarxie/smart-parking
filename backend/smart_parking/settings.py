@@ -3,14 +3,14 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# load environment variables
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -21,9 +21,6 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
-# Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -32,7 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     
-    # Third party apps
+    # third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -40,14 +37,14 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     
-    # Local apps
+    # local apps
     'api',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # CORS middleware
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # CORS middleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -76,7 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "smart_parking.wsgi.application"
 
 
-# Database
+# database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
@@ -87,7 +84,7 @@ DATABASES = {
 }
 
 
-# Password validation
+# password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -106,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
@@ -118,22 +115,22 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files
+# media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
+# default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom user model
+# custom user model
 AUTH_USER_MODEL = 'api.User'
 
 # REST Framework settings
@@ -174,30 +171,52 @@ SIMPLE_JWT = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React development server
+    "http://localhost:3000",  # react development server
     "http://127.0.0.1:3000",
+    "http://localhost:5173",  # vite development server
+    "http://127.0.0.1:5173",
 ]
 
-# Email settings (for development)
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# email settings (for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Reservation settings
-RESERVATION_EXPIRY_MINUTES = 15  # Time window for reservation confirmation
-RESERVATION_CANCELLATION_WINDOW_HOURS = 1  # Time window for cancellation before start time
+# reservation settings
+RESERVATION_EXPIRY_MINUTES = 15  # time window for reservation confirmation
+RESERVATION_CANCELLATION_WINDOW_HOURS = 1  # time window for cancellation before start time
 
-# Spectacular settings
+# spectacular settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Smart Parking API',
-    'DESCRIPTION': 'API for managing smart parking system',
+    'DESCRIPTION': 'API for Smart Parking System',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    'COMPONENT_SPLIT_REQUEST': True,
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'persistAuthorization': True,
         'displayOperationId': True,
     },
-    # Use CDN for Swagger UI
-    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0',
-    'SWAGGER_UI_FAVICON_HREF': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.11.0/favicon-32x32.png',
+    'COMPONENT_SPLIT_REQUEST': True,
 }
