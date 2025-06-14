@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User, LoginCredentials, RegisterData, AuthResponse } from '../types/auth';
-import api from '../services/api';
+import axios from 'axios';
+import type { RegisterData, User } from '../types/auth';
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   loading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (email: string, password: string, isAdmin: boolean) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -14,71 +15,188 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+/**
+ * Auth provider component that provides authentication state and methods
+ *
+ * @param {AuthProviderProps}
+ * @returns {React.ReactNode}
+ */
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // check for existing auth on mount
   useEffect(() => {
-    // check if user is logged in on mount
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
+    const initializeAuth = async () => {
+      try {
+        const storedToken = localStorage.getItem('access_token');
+        const storedUser = localStorage.getItem('user');
+
+        console.log('Initializing auth with stored data:', {
+          hasToken: !!storedToken,
+          hasUser: !!storedUser,
+        });
+
+        if (storedToken && storedUser) {
+          try {
+            // only set auth if token is valid
+            setToken(storedToken);
+            setUser(JSON.parse(storedUser));
+            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          } catch (error) {
+            // clear invalid auth data
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            setToken(null);
+            setUser(null);
+            delete axios.defaults.headers.common['Authorization'];
+          }
+        } else {
+          setToken(null);
+          setUser(null);
+          delete axios.defaults.headers.common['Authorization'];
+        }
+      } catch (error) {
+        // clear any invalid stored data
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
+        delete axios.defaults.headers.common['Authorization'];
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  const fetchUser = async () => {
+  const login = async (email: string, password: string, isAdmin: boolean) => {
+    setLoading(true);
     try {
-      const response = await api.get('/users/me/');
-      setUser(response.data);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/token/`, {
+        email,
+        password,
+      });
+
+      const { access, refresh } = response.data;
+
+      // store tokens in localStorage
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+
+      // get user data
+      const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/me/`, {
+        headers: {
+          Authorization: `Bearer ${access}`,
+        },
+      });
+
+      const userData = userResponse.data;
+
+      // check if user is admin
+      if (isAdmin && userData.role !== 'ADMIN') {
+        throw new Error('Not authorized as admin');
+      }
+
+      // store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // update state
+      setToken(access);
+      setUser(userData);
+
+      // set default authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
     } catch (error) {
-      console.error('Error fetching user:', error);
+      // clear any stored data on login failure
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      setToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error('Invalid email or password');
+        } else if (error.response?.status === 403) {
+          throw new Error(isAdmin ? 'Not authorized as admin' : 'Please use admin login');
+        }
+      }
+      throw new Error(error instanceof Error ? error.message : 'An error occurred during login');
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (credentials: LoginCredentials) => {
-    const response = await api.post<AuthResponse>('/token/', credentials);
-    const { access, refresh } = response.data;
-    
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-    
-    await fetchUser();
+  const logout = () => {
+    setLoading(true);
+    try {
+      // clear auth data
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      setToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (data: RegisterData) => {
-    await api.post('/register/', data);
-    await login({ email: data.email, password: data.password });
-  };
+    setLoading(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/register/`, data);
+      await login(data.email, data.password, false);
+    } catch (error) {
+      // clear any stored data on registration failure
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      setToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
 
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    setUser(null);
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 400) {
+          // handle validation errors from the backend
+          const errorMessage =
+            error.response.data?.detail ||
+            error.response.data?.message ||
+            'Registration failed. Please check your input.';
+          throw new Error(errorMessage);
+        }
+        throw new Error('Registration failed. Please try again.');
+      }
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {
     user,
+    token,
     loading,
     login,
     register,
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated: !!token,
     isAdmin: user?.role === 'ADMIN',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}
 
-export const useAuth = () => {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+}
