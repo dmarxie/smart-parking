@@ -4,7 +4,6 @@
 
 A smart parking management system that helps users find and manage parking spaces efficiently.
 
-
 ### Features
 
 - User authentication with JWT
@@ -16,6 +15,7 @@ A smart parking management system that helps users find and manage parking space
 ## Tech Stack
 
 ### Backend
+
 - Django
 - Django REST Framework
 - SQLite
@@ -23,6 +23,7 @@ A smart parking management system that helps users find and manage parking space
 - Python 3.8+
 
 ### Frontend
+
 - React
 - Material-UI
 - Axios
@@ -31,19 +32,23 @@ A smart parking management system that helps users find and manage parking space
 ## Setup Instructions
 
 ### Backend Setup
+
 1. Create and activate virtual environment:
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 2. Install dependencies:
+
    ```bash
    cd backend
    pip install -r requirements.txt
    ```
 
 3. Run migrations:
+
    ```bash
    python manage.py migrate
    ```
@@ -54,7 +59,9 @@ A smart parking management system that helps users find and manage parking space
    ```
 
 ### Frontend Setup
+
 1. Install dependencies:
+
    ```bash
    cd frontend
    npm install
@@ -62,7 +69,7 @@ A smart parking management system that helps users find and manage parking space
 
 2. Start development server:
    ```bash
-   npm start
+   npm run dev
    ```
 
 ## Development
