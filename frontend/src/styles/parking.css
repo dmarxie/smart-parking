@@ -1,0 +1,138 @@
+.parking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.parking-slot {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 180px;
+  min-height: 180px;
+  border: 2px solid #dee2e6;
+}
+
+.parking-slot:hover:not(.occupied):not(.pending) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.parking-slot.available {
+  background-color: #e8f5e9;
+  border-color: #81c784;
+}
+
+.parking-slot.occupied {
+  background-color: #ffebee;
+  border-color: #e57373;
+  cursor: not-allowed;
+}
+
+.parking-slot.pending {
+  background-color: #fff3cd;
+  border-color: #ffd54f;
+  cursor: not-allowed;
+}
+
+.slot-number {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.parking-slot.occupied .slot-number {
+  color: #e57373;
+}
+
+.parking-slot.pending .slot-number {
+  color: #f57c00;
+}
+
+.parking-slot .btn {
+  width: 80%;
+  margin-top: 0.5rem;
+}
+
+.parking-slot .text-danger,
+.parking-slot .text-warning {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .parking-slot {
+    height: 100px;
+  }
+
+  .slot-number {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .parking-slot {
+    height: 90px;
+  }
+
+  .slot-number {
+    font-size: 1rem;
+  }
+}
+
+.location-name {
+  background-color: var(--bs-dark);
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.location-name .card-body {
+  padding: 1.5rem;
+}
+
+.location-name h1 {
+  color: var(--bs-light);
+  margin-bottom: 0.5rem;
+}
+
+.location-name p {
+  color: var(--bs-gray-400);
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .parking-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .parking-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Pagination Styles */
+.dark-pagination .page-link {
+  background-color: #0b0b0b;
+  border-color: #2c2c2c;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.dark-pagination .page-link:hover {
+  background-color: #1a1a1a;
+  border-color: #2c2c2c;
+  color: #fff;
+}
+
+.dark-pagination .page-item.active .page-link {
+  background-color: #2c2c2c;
+  border-color: #2c2c2c;
+  color: #fff;
+}
+
+.dark-pagination .page-item.disabled .page-link {
+  background-color: #0b0b0b;
+  border-color: #2c2c2c;
+  color: #6c757d;
+}

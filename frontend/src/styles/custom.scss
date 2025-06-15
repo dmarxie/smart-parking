@@ -210,9 +210,18 @@ $secondary: #ffffff;
 }
 
 // basic user dashboard styles
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 4fr 4fr;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
 .user-card {
-  background-color: #0b0b0b;
-  border: 1px solid #151515;
+  border: 2px dashed #151515;
+  background-color: transparent;
   border-radius: 12px;
   color: white;
 
@@ -269,4 +278,12 @@ $secondary: #ffffff;
   i {
     font-size: 1.1rem;
   }
+}
+
+// location slots styles
+.location-name {
+  background-color: #0b0b0b;
+  border: 2px solid #151515;
+  border-radius: 12px;
+  color: white;
 }
