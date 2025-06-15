@@ -2,3 +2,271 @@ $primary: #f6e71e;
 $secondary: #ffffff;
 
 @import 'bootstrap/scss/bootstrap';
+
+// admin layout styles
+.admin-layout {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+
+  .admin-content {
+    flex: 1;
+    margin-left: 250px;
+    padding: 24px;
+    transition: margin-left 0.3s ease;
+  }
+}
+
+// admin sidebar styles
+.admin-sidebar {
+  width: 250px;
+  height: calc(100% - 48px);
+  margin: 24px;
+  border-radius: 12px;
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+
+  .sidebar-header {
+    color: white;
+    border-color: #151515 !important;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-link {
+    color: #a0a0a0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+      color: $primary;
+      background-color: rgba($primary, 0.1);
+    }
+
+    i {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+// responsive sidebar
+@media (max-width: 768px) {
+  .admin-sidebar {
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    transform: translateX(-100%) !important;
+
+    &.show {
+      transform: translateX(0) !important;
+    }
+  }
+
+  .admin-content {
+    padding: 12px;
+    margin-left: 0 !important;
+  }
+
+  .sidebar-toggle {
+    display: block !important;
+  }
+}
+
+// logout modal styles
+.logout-modal {
+  .modal-content {
+    background-color: #0b0b0b;
+    border: 1px solid #151515;
+    color: white;
+  }
+
+  .modal-header {
+    .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+  }
+
+  .modal-footer {
+    .btn-secondary {
+      background-color: #151515;
+      border-color: #151515;
+      color: white;
+
+      &:hover {
+        background-color: #252525;
+        border-color: #252525;
+      }
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+
+      &:hover {
+        background-color: #bb2d3b;
+        border-color: #bb2d3b;
+      }
+    }
+  }
+}
+
+// location cards
+.location-card {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-color: $primary;
+  }
+
+  &.add-card {
+    border: 2px dashed #151515;
+    background-color: transparent;
+
+    &:hover {
+      border-color: $primary;
+      background-color: rgba($primary, 0.05);
+    }
+
+    .bi-plus-circle {
+      color: $primary;
+    }
+  }
+
+  .card-body {
+    color: white;
+
+    .address-text {
+      height: 48px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      word-break: break-word;
+    }
+  }
+
+  .badge {
+    font-size: 0.8rem;
+    padding: 0.5em 0.8em;
+  }
+}
+
+// profile dropdown styles
+.dropdown-menu {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem;
+
+  .dropdown-item {
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      font-size: 1.1rem;
+    }
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    &.text-danger {
+      color: #dc3545 !important;
+
+      &:hover {
+        background-color: rgba(220, 53, 69, 0.1);
+      }
+    }
+  }
+
+  .dropdown-divider {
+    border-color: #151515;
+    margin: 0.5rem 0;
+  }
+}
+
+// basic user dashboard styles
+.user-card {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  border-radius: 12px;
+  color: white;
+
+  .stat-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #151515;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border-color: $primary;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba($primary, 0.1);
+      border-radius: 8px;
+      color: $primary;
+      font-size: 1.5rem;
+    }
+
+    h6 {
+      color: #a0a0a0;
+      font-size: 0.875rem;
+    }
+
+    h3 {
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// profile button styles
+.btn-outline-light {
+  border-color: #151515;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #151515;
+    color: white;
+  }
+
+  i {
+    font-size: 1.1rem;
+  }
+}
