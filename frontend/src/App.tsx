@@ -1,7 +1,15 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
-import { AdminDashboard, AdminLoginPage, Dashboard, HomePage, LoginPage, Register } from './pages';
+import { HomePage, LoginPage, Register } from './pages';
+import {
+  AdminDashboard,
+  AdminLocationsPage,
+  AdminLoginPage,
+  AdminReservationsPage,
+  AdminUserManagementPage,
+} from './pages/admin';
+import { Dashboard } from './pages/basic-user';
 import { AdminRoute, PrivateRoute } from './components';
 import './styles/custom.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -33,6 +41,30 @@ function App() {
                 element={
                   <AdminRoute>
                     <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/locations"
+                element={
+                  <AdminRoute>
+                    <AdminLocationsPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/reservations"
+                element={
+                  <AdminRoute>
+                    <AdminReservationsPage />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminRoute>
+                    <AdminUserManagementPage />
                   </AdminRoute>
                 }
               />
