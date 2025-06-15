@@ -9,7 +9,7 @@ import {
   AdminReservationsPage,
   AdminUserManagementPage,
 } from './pages/admin';
-import { Dashboard } from './pages/basic-user';
+import { Dashboard, ParkingSlots } from './pages/basic-user';
 import { AdminRoute, PrivateRoute } from './components';
 import './styles/custom.scss';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -66,6 +66,14 @@ function App() {
                   <AdminRoute>
                     <AdminUserManagementPage />
                   </AdminRoute>
+                }
+              />
+              <Route
+                path="/locations/:id"
+                element={
+                  <PrivateRoute>
+                    <ParkingSlots />
+                  </PrivateRoute>
                 }
               />
               <Route path="/" element={<Navigate to="/login" replace />} />

@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string, isAdmin: boolean) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  updateUser: (userData: User) => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
 }
@@ -32,11 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const storedToken = localStorage.getItem('access_token');
         const storedUser = localStorage.getItem('user');
-
-        console.log('Initializing auth with stored data:', {
-          hasToken: !!storedToken,
-          hasUser: !!storedUser,
-        });
 
         if (storedToken && storedUser) {
           try {
@@ -74,6 +70,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initializeAuth();
   }, []);
 
+  /**
+   * Login function
+   * @param email
+   * @param password
+   * @param isAdmin
+   * @returns
+   */
   const login = async (email: string, password: string, isAdmin: boolean) => {
     setLoading(true);
     try {
@@ -133,6 +136,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Logout function
+   * @returns void
+   */
   const logout = () => {
     setLoading(true);
     try {
@@ -148,6 +155,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Register function
+   *
+   * @param data
+   * @returns
+   */
   const register = async (data: RegisterData) => {
     setLoading(true);
     try {
@@ -179,6 +192,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Update user function
+   * @param userData
+   * @returns void
+   */
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const value = {
     user,
     token,
@@ -186,6 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!token,
     isAdmin: user?.role === 'ADMIN',
   };
@@ -193,6 +217,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/**
+ * Use auth hook
+ *
+ * @returns AuthContextType
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
