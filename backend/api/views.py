@@ -18,6 +18,7 @@ from .serializers import (
     # Reservation serializers
     ReservationSerializer, ReservationCreateSerializer, ReservationUpdateSerializer
 )
+from .pagination import CustomPagination
 
 User = get_user_model()
 
@@ -149,15 +150,19 @@ class ParkingLocationListView(generics.ListCreateAPIView):
 @extend_schema(tags=['Locations'])
 class ParkingLocationDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    Retrieve, update or delete a parking location (Admin only).
+    Retrieve, update or delete a parking location.
     
-    - GET: Retrieve a specific parking location
-    - PUT/PATCH: Update a parking location
-    - DELETE: Delete a parking location
+    - GET: Retrieve a specific parking location (authenticated users)
+    - PUT/PATCH: Update a parking location (admin only)
+    - DELETE: Delete a parking location (admin only)
     """
     queryset = ParkingLocation.objects.all()
     serializer_class = ParkingLocationSerializer
-    permission_classes = (IsAdminUser,)
+
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [permissions.IsAuthenticated()]
 
 # Parking Slot Views
 @extend_schema(tags=['Slots'])
@@ -200,6 +205,21 @@ class ParkingSlotDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ParkingSlot.objects.all()
     serializer_class = ParkingSlotSerializer
     permission_classes = (IsAdminUser,)
+
+@extend_schema(tags=['Slots'])
+class LocationParkingSlotsView(generics.ListAPIView):
+    """
+    List all parking slots for a specific location.
+    
+    - GET: List all parking slots for a location (public)
+    """
+    serializer_class = ParkingSlotSerializer
+    permission_classes = (permissions.AllowAny,)
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        location_id = self.kwargs.get('pk')
+        return ParkingSlot.objects.filter(location_id=location_id)
 
 # Reservation Views
 @extend_schema(tags=['Reservations'])

@@ -89,9 +89,8 @@ class User(AbstractUser):
         if self.notification_preference == self.NotificationPreference.NONE:
             return False
         if self.notification_preference == self.NotificationPreference.IMPORTANT:
-            # Only send important notifications
             return notification_type in ['reservation_cancellation', 'reservation_expiry']
-        return True  # NotificationPreference.ALL
+        return True 
 
 class ParkingLocation(models.Model):
     """Model for parking locations."""
@@ -110,6 +109,43 @@ class ParkingLocation(models.Model):
     def available_slots(self):
         """Calculate available slots."""
         return self.total_slots - self.parkingslot_set.filter(is_occupied=True).count()
+
+    def save(self, *args, **kwargs):
+        """Handle parking location creation and updates."""
+
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            slots = []
+            for i in range(1, self.total_slots + 1):
+                slot = ParkingSlot(
+                    location=self,
+                    slot_number=f'{i:03d}',
+                    is_occupied=False,
+                    is_reserved=False
+                )
+                slots.append(slot)
+            ParkingSlot.objects.bulk_create(slots)
+        elif 'total_slots' in kwargs.get('update_fields', []):
+            current_slots = self.parkingslot_set.count()
+            if self.total_slots > current_slots:
+                new_slots = []
+                for i in range(current_slots + 1, self.total_slots + 1):
+                    slot = ParkingSlot(
+                        location=self,
+                        slot_number=f'{i:03d}',
+                        is_occupied=False,
+                        is_reserved=False
+                    )
+                    new_slots.append(slot)
+                ParkingSlot.objects.bulk_create(new_slots)
+            elif self.total_slots < current_slots:
+                self.parkingslot_set.filter(
+                    is_occupied=False,
+                    is_reserved=False,
+                    slot_number__gt=f'{self.total_slots:03d}'
+                ).delete()
 
 class ParkingSlot(models.Model):
     """Model for individual parking slots."""
@@ -159,12 +195,10 @@ class Reservation(models.Model):
             self.created_at = timezone.now()
             
         if self.status == self.Status.PENDING:
-            # Check if reservation is expired
             expiry_time = self.created_at + timedelta(minutes=settings.RESERVATION_EXPIRY_MINUTES)
             if timezone.now() > expiry_time:
                 self.status = self.Status.EXPIRED
-        elif self.status == self.Status.CONFIRMED:
-            # Check if reservation is completed
+        elif self.status == self.Status.CONFIRMED:          
             if timezone.now() > self.end_time:
                 self.status = self.Status.COMPLETED
         super().save(*args, **kwargs)

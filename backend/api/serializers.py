@@ -6,7 +6,6 @@ from django.utils import timezone
 
 User = get_user_model()
 
-# User Serializers
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User model."""
     
@@ -56,7 +55,6 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"new_password": "Password fields didn't match."})
         return attrs
 
-# Parking Location Serializers
 class ParkingLocationSerializer(serializers.ModelSerializer):
     """Serializer for parking locations."""
     
@@ -75,7 +73,6 @@ class ParkingLocationCreateSerializer(serializers.ModelSerializer):
         model = ParkingLocation
         fields = ('name', 'address', 'total_slots', 'is_active')
 
-# Parking Slot Serializers
 class ParkingSlotSerializer(serializers.ModelSerializer):
     """Serializer for parking slots."""
     
@@ -105,7 +102,6 @@ class ParkingSlotCreateSerializer(serializers.ModelSerializer):
             )
         return attrs
 
-# Reservation Serializers
 class ReservationSerializer(serializers.ModelSerializer):
     """Serializer for reservations."""
     
@@ -181,6 +177,18 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             return attrs
         except Exception as e:
             raise serializers.ValidationError(str(e))
+
+    def create(self, validated_data):
+        parking_slot = validated_data['parking_slot']
+        
+        reservation = Reservation.objects.create(
+            **validated_data
+        )
+        
+        parking_slot.is_reserved = True
+        parking_slot.save()
+        
+        return reservation
 
 class ReservationUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating reservations (admin only)."""
