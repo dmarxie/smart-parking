@@ -17,16 +17,22 @@ const loginSchema = Yup.object().shape({
     .min(8, 'Password must be at least 8 characters'),
 });
 
+interface LoginFormProps {
+  isAdmin?: boolean;
+}
+
 /**
  * Login form component
  *
+ * @param {LoginFormProps} props
  * @returns Login form component
  */
-export function LoginForm() {
+export function LoginForm({ isAdmin = false }: LoginFormProps) {
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const location = useLocation();
-  const isAdmin = location.pathname === '/admin/login';
+  const isAdminRoute = location.pathname === '/admin/login';
   const [showPassword, setShowPassword] = useState(false);
 
   /**
@@ -40,8 +46,8 @@ export function LoginForm() {
     { setStatus, setSubmitting }: any
   ) => {
     try {
-      await login(values.email, values.password, isAdmin);
-      navigate(isAdmin ? '/admin/dashboard' : '/dashboard');
+      await login(values.email, values.password, isAdmin || isAdminRoute);
+      navigate(isAdmin || isAdminRoute ? '/admin/dashboard' : '/dashboard');
     } catch (error) {
       setStatus(error instanceof Error ? error.message : 'An error occurred');
       setSubmitting(false);
@@ -52,7 +58,7 @@ export function LoginForm() {
     <Card className="login-form shadow-sm py-4">
       <Card.Body className="p-4">
         <Card.Title className="text-center mb-4">
-          {isAdmin ? 'Admin Login' : 'User Login'}
+          {isAdmin || isAdminRoute ? 'Admin Login' : 'User Login'}
         </Card.Title>
 
         <Formik
@@ -114,7 +120,7 @@ export function LoginForm() {
             </Form>
           )}
         </Formik>
-        {!isAdmin && (
+        {!isAdmin && !isAdminRoute && (
           <div className="auth-footer">
             <p className="mb-0 text-subtitle-gray">Don't have an account?</p>
             <Link to="/register">Register here</Link>
