@@ -29,7 +29,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // if the error is 401 and refresh token was not tried yet
     if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -42,11 +41,9 @@ api.interceptors.response.use(
         const { access } = response.data;
         localStorage.setItem('access_token', access);
 
-        // retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${access}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // if refresh token fails, logout the user
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';
@@ -58,4 +55,4 @@ api.interceptors.response.use(
   }
 );
 
-export default api; 
+export default api;

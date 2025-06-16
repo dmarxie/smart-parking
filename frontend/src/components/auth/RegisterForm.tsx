@@ -50,6 +50,12 @@ export function RegisterForm() {
     notification_preference: 'ALL',
   };
 
+  /**
+   * handle registration
+   *
+   * @param values
+   * @param param1
+   */
   const handleSubmit = async (values: RegisterData, { setStatus, setSubmitting }: any) => {
     try {
       await register(values);

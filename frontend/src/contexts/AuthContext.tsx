@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // check for existing auth on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -36,12 +35,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (storedToken && storedUser) {
           try {
-            // only set auth if token is valid
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
           } catch (error) {
-            // clear invalid auth data
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
@@ -55,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           delete axios.defaults.headers.common['Authorization'];
         }
       } catch (error) {
-        // clear any invalid stored data
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
@@ -72,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Login function
+   *
    * @param email
    * @param password
    * @param isAdmin
@@ -87,11 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const { access, refresh } = response.data;
 
-      // store tokens in localStorage
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
 
-      // get user data
       const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/api/users/me/`, {
         headers: {
           Authorization: `Bearer ${access}`,
@@ -100,22 +95,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const userData = userResponse.data;
 
-      // check if user is admin
       if (isAdmin && userData.role !== 'ADMIN') {
         throw new Error('Not authorized as admin');
       }
 
-      // store user data in localStorage
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // update state
       setToken(access);
       setUser(userData);
 
-      // set default authorization header for future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
     } catch (error) {
-      // clear any stored data on login failure
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
@@ -138,12 +128,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Logout function
+   *
    * @returns void
    */
   const logout = () => {
     setLoading(true);
     try {
-      // clear auth data
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
@@ -194,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   /**
    * Update user function
+   *
    * @param userData
    * @returns void
    */
