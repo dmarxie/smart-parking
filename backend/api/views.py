@@ -101,7 +101,7 @@ class ChangePasswordView(generics.UpdateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 @extend_schema(tags=['Users'])
-class UserListView(generics.ListAPIView):
+class UserListView(generics.ListAPIView, generics.DestroyAPIView):
     """
     List all users (Admin only).
     
@@ -109,6 +109,8 @@ class UserListView(generics.ListAPIView):
     - Filter by: role, is_active
     - Search in: email, first_name, last_name
     - Order by: created_at, email
+    
+    Also allows deletion of users (Admin only).
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -117,6 +119,37 @@ class UserListView(generics.ListAPIView):
     filterset_fields = ['role', 'is_active']
     search_fields = ['email', 'first_name', 'last_name']
     ordering_fields = ['created_at', 'email']
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete a user (Admin only)."""
+        instance = self.get_object()
+        if instance.role == User.Role.ADMIN:
+            return Response(
+                {"detail": "Cannot delete admin users."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+@extend_schema(tags=['Users'])
+class UserDeleteView(generics.DestroyAPIView):
+    """
+    Delete a user (Admin only).
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminUser,)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete a user (Admin only)."""
+        instance = self.get_object()
+        if instance.role == User.Role.ADMIN:
+            return Response(
+                {"detail": "Cannot delete admin users."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Parking Location Views
 @extend_schema(tags=['Locations'])

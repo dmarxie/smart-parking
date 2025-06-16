@@ -17,6 +17,7 @@ urlpatterns = [
     path('users/me/', views.UserDetailView.as_view(), name='user-detail'),
     path('users/me/change-password/', views.ChangePasswordView.as_view(), name='change-password'),
     path('users/', views.UserListView.as_view(), name='user-list'),
+    path('users/<int:pk>/', views.UserDeleteView.as_view(), name='user-delete'),
     
     # parking location endpoints
     path('locations/', views.ParkingLocationListView.as_view(), name='location-list'),
@@ -34,4 +35,4 @@ urlpatterns = [
     
     # dashboard endpoints (admin only)
     path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
-] 
+]

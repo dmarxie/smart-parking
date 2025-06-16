@@ -23,9 +23,9 @@ export interface ReservationsResponse {
   previous: string | null;
 }
 
-export interface PaginatedResponse {
+export interface PaginatedResponse<T> {
   count: number;
   next: string | null;
   previous: string | null;
-  results: Reservation[];
+  results: T[];
 }
