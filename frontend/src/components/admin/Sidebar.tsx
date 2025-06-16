@@ -51,6 +51,7 @@ export const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ className }, 
   return (
     <>
       <div ref={ref} className={`admin-sidebar ${className || ''}`}>
+        <h4 className="m-0 pt-4">Admin View</h4>
         <div className="sidebar-header p-3">
           <Image src={logo} alt="Navipark Logo" className="w-100 h-75 object-fit-contain" />
         </div>
