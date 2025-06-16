@@ -7,8 +7,11 @@ from django.utils import timezone
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for the User model."""
-    
+    """
+    Base serializer for User model.
+    Used for listing and retrieving user information.
+    """
+
     class Meta:
         model = User
         fields = ('id', 'email', 'role', 'first_name', 'last_name', 
@@ -16,7 +19,10 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'role', 'created_at')
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating a new user."""
+    """
+    Serializer for user registration.
+    Handles password validation and confirmation.
+    """
     
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -27,24 +33,32 @@ class UserCreateSerializer(serializers.ModelSerializer):
                  'notification_preference')
 
     def validate(self, attrs):
+        """Validate that passwords match."""
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
 
     def create(self, validated_data):
+        """Create a new user with validated data."""
         validated_data.pop('password2')
         user = User.objects.create_user(**validated_data)
         return user
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating user information."""
+    """
+    Serializer for updating user profile information.
+    Excludes sensitive fields like password and role.
+    """
     
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'notification_preference')
 
 class ChangePasswordSerializer(serializers.Serializer):
-    """Serializer for password change endpoint."""
+    """
+    Serializer for password change operations.
+    Validates old password and new password confirmation.
+    """
     
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True, validators=[validate_password])
@@ -55,8 +69,12 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"new_password": "Password fields didn't match."})
         return attrs
 
+
 class ParkingLocationSerializer(serializers.ModelSerializer):
-    """Serializer for parking locations."""
+    """
+    Base serializer for ParkingLocation model.
+    Includes computed available_slots field.
+    """
     
     available_slots = serializers.IntegerField(read_only=True)
     
@@ -67,43 +85,77 @@ class ParkingLocationSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 class ParkingLocationCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating parking locations (admin only)."""
+    """
+    Serializer for creating new parking locations (Admin only).
+    """
     
     class Meta:
         model = ParkingLocation
         fields = ('name', 'address', 'total_slots', 'is_active')
 
+# Parking Slot Serializers
 class ParkingSlotSerializer(serializers.ModelSerializer):
-    """Serializer for parking slots."""
+    """
+    Base serializer for ParkingSlot model.
+    Includes location name and current reservation information.
+    """
     
     location_name = serializers.CharField(source='location.name', read_only=True)
+    current_reservation = serializers.SerializerMethodField()
     
     class Meta:
         model = ParkingSlot
         fields = ('id', 'location', 'location_name', 'slot_number', 
-                 'is_occupied', 'is_reserved', 'created_at', 'updated_at')
+                 'is_occupied', 'is_reserved', 'current_reservation', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
 
+    def get_current_reservation(self, obj):
+        """
+        Get the current active reservation for this slot.
+        """
+        now = timezone.now()
+        reservation = Reservation.objects.filter(
+            parking_slot=obj,
+            start_time__lte=now,
+            end_time__gte=now,
+            status__in=['PENDING', 'CONFIRMED']
+        ).first()
+        
+        if reservation:
+            return {
+                'status': reservation.status
+            }
+        return None
+
 class ParkingSlotCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating parking slots (admin only)."""
+    """
+    Serializer for creating new parking slots.
+    Validates slot number uniqueness within location.
+    """
     
     class Meta:
         model = ParkingSlot
         fields = ('location', 'slot_number')
 
     def validate(self, attrs):
+        """
+        Validate slot number uniqueness within location.
+        """
         location = attrs['location']
         slot_number = attrs['slot_number']
         
-        # Check if slot number already exists for this location
         if ParkingSlot.objects.filter(location=location, slot_number=slot_number).exists():
             raise serializers.ValidationError(
                 {"slot_number": "This slot number already exists for this location."}
             )
         return attrs
 
+
 class ReservationSerializer(serializers.ModelSerializer):
-    """Serializer for reservations."""
+    """
+    Base serializer for Reservation model.
+    Includes computed fields and related model information.
+    """
     
     user_email = serializers.EmailField(source='user.email', read_only=True)
     location_name = serializers.CharField(source='parking_slot.location.name', read_only=True)
@@ -113,12 +165,15 @@ class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = ('id', 'user', 'user_email', 'parking_slot', 'location_name', 
-                 'slot_number', 'start_time', 'end_time', 'status', 
+                 'slot_number', 'start_time', 'end_time', 'vehicle_plate', 'status', 
                  'can_be_cancelled', 'created_at', 'updated_at')
         read_only_fields = ('id', 'user', 'created_at', 'updated_at')
 
     def validate_status(self, value):
-        """Validate status changes."""
+        """
+        Validate status changes.
+        Prevents modification of completed reservations.
+        """
         instance = getattr(self, 'instance', None)
         if instance and instance.status == 'COMPLETED':
             raise serializers.ValidationError(
@@ -127,13 +182,20 @@ class ReservationSerializer(serializers.ModelSerializer):
         return value
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating reservations."""
+    """
+    Serializer for creating new reservations.
+    Handles validation of time slots and availability.
+    """
     
     class Meta:
         model = Reservation
-        fields = ('parking_slot', 'start_time', 'end_time')
+        fields = ('parking_slot', 'start_time', 'end_time', 'vehicle_plate')
 
     def validate(self, attrs):
+        """
+        Validate reservation creation parameters.
+        Checks time validity, slot availability, and conflicts.
+        """
         try:
             start_time = attrs['start_time']
             end_time = attrs['end_time']
@@ -163,7 +225,6 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
                     {"parking_slot": "Invalid parking slot."}
                 )
             
-            # Check if slot is available for the time range
             if Reservation.objects.filter(
                 parking_slot=parking_slot,
                 status__in=['PENDING', 'CONFIRMED'],
@@ -179,6 +240,9 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(e))
 
     def create(self, validated_data):
+        """
+        Create a new reservation and update slot status.
+        """
         parking_slot = validated_data['parking_slot']
         
         reservation = Reservation.objects.create(
@@ -191,17 +255,51 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         return reservation
 
 class ReservationUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating reservations (admin only)."""
+    """
+    Serializer for updating reservation status (Admin only).
+    """
     
     class Meta:
         model = Reservation
         fields = ('status',)
 
     def validate_status(self, value):
-        """Validate status changes."""
+        """
+        Validate status changes.
+        Prevents modification of completed reservations.
+        """
         instance = getattr(self, 'instance', None)
         if instance and instance.status == 'COMPLETED':
             raise serializers.ValidationError(
                 "Cannot change status of a completed reservation."
             )
-        return value 
+        return value
+
+    def update(self, instance, validated_data):
+        """
+        Update reservation status and handle slot status changes.
+        """
+        old_status = instance.status
+        new_status = validated_data.get('status', instance.status)
+        
+        instance.status = new_status
+        instance.save()
+
+        slot = instance.parking_slot
+        if new_status in ['CANCELLED', 'COMPLETED', 'EXPIRED']:
+            now = timezone.now()
+            has_active_reservations = Reservation.objects.filter(
+                parking_slot=slot,
+                start_time__lte=now,
+                end_time__gte=now,
+                status__in=['PENDING', 'CONFIRMED']
+            ).exclude(id=instance.id).exists()
+            
+            if not has_active_reservations:
+                slot.is_reserved = False
+                slot.save()
+        elif new_status == 'CONFIRMED':
+            slot.is_reserved = True
+            slot.save()
+        
+        return instance 
