@@ -310,7 +310,7 @@ class ReservationCancelView(generics.UpdateAPIView):
     Cancel a reservation.
     
     Cancels a reservation if it meets the cancellation criteria:
-    - Reservation must be in PENDING or CONFIRMED status
+    - Reservation must be in PENDING status
     - Must be within the cancellation window (default: 1 hour before start time)
     """
     queryset = Reservation.objects.all()

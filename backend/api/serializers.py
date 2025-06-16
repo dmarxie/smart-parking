@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import ParkingLocation, ParkingSlot, Reservation
 from django.utils import timezone
+from django.db import models
+from .models import ParkingLocation, ParkingSlot, Reservation
 
 User = get_user_model()
 
@@ -73,16 +74,35 @@ class ChangePasswordSerializer(serializers.Serializer):
 class ParkingLocationSerializer(serializers.ModelSerializer):
     """
     Base serializer for ParkingLocation model.
-    Includes computed available_slots field.
+    Includes computed available_slots field based on actual reservation status.
     """
     
-    available_slots = serializers.IntegerField(read_only=True)
+    available_slots = serializers.SerializerMethodField()
     
     class Meta:
         model = ParkingLocation
         fields = ('id', 'name', 'address', 'total_slots', 'available_slots', 
                  'is_active', 'created_at', 'updated_at')
         read_only_fields = ('id', 'created_at', 'updated_at')
+
+    def get_available_slots(self, obj):
+        """
+        Calculate available slots based on actual reservation status.
+        """
+        now = timezone.now()
+        total_slots = obj.parkingslot_set.count()
+        
+        # count slots that are either occupied or have active confirmed reservations
+        unavailable_slots = obj.parkingslot_set.filter(
+            models.Q(is_occupied=True) |
+            models.Q(
+                reservation__status='CONFIRMED',
+                reservation__start_time__lte=now,
+                reservation__end_time__gte=now
+            )
+        ).distinct().count()
+        
+        return total_slots - unavailable_slots
 
 class ParkingLocationCreateSerializer(serializers.ModelSerializer):
     """
@@ -93,7 +113,7 @@ class ParkingLocationCreateSerializer(serializers.ModelSerializer):
         model = ParkingLocation
         fields = ('name', 'address', 'total_slots', 'is_active')
 
-# Parking Slot Serializers
+
 class ParkingSlotSerializer(serializers.ModelSerializer):
     """
     Base serializer for ParkingSlot model.
@@ -111,19 +131,22 @@ class ParkingSlotSerializer(serializers.ModelSerializer):
 
     def get_current_reservation(self, obj):
         """
-        Get the current active reservation for this slot.
+        Get the current reservation for this slot (PENDING or CONFIRMED).
+        Returns status, start_time, end_time, and user id.
         """
         now = timezone.now()
         reservation = Reservation.objects.filter(
             parking_slot=obj,
-            start_time__lte=now,
             end_time__gte=now,
             status__in=['PENDING', 'CONFIRMED']
-        ).first()
-        
+        ).order_by('start_time').first()
         if reservation:
             return {
-                'status': reservation.status
+                'id': reservation.id,
+                'status': reservation.status,
+                'start_time': reservation.start_time,
+                'end_time': reservation.end_time,
+                'user': reservation.user.id
             }
         return None
 
@@ -201,33 +224,34 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             end_time = attrs['end_time']
             parking_slot = attrs['parking_slot']
             
-            # Validate time range
+            # validate time range
             if start_time >= end_time:
                 raise serializers.ValidationError(
                     {"end_time": "End time must be after start time."}
                 )
             
-            # Validate that start time is in the future
+            # validate that start time is in the future
             if start_time <= timezone.now():
                 raise serializers.ValidationError(
                     {"start_time": "Start time must be in the future."}
                 )
             
-            # Check if slot exists and is available
+            # check if slot exists and is available
             try:
                 slot = ParkingSlot.objects.get(id=parking_slot.id)
-                if slot.is_occupied or slot.is_reserved:
+                if slot.is_occupied:
                     raise serializers.ValidationError(
-                        {"parking_slot": "This slot is currently occupied or reserved."}
+                        {"parking_slot": "This slot is currently occupied."}
                     )
             except ParkingSlot.DoesNotExist:
                 raise serializers.ValidationError(
                     {"parking_slot": "Invalid parking slot."}
                 )
             
+            # check for conflicting CONFIRMED reservations
             if Reservation.objects.filter(
                 parking_slot=parking_slot,
-                status__in=['PENDING', 'CONFIRMED'],
+                status='CONFIRMED',
                 start_time__lt=end_time,
                 end_time__gt=start_time
             ).exists():
@@ -264,10 +288,6 @@ class ReservationUpdateSerializer(serializers.ModelSerializer):
         fields = ('status',)
 
     def validate_status(self, value):
-        """
-        Validate status changes.
-        Prevents modification of completed reservations.
-        """
         instance = getattr(self, 'instance', None)
         if instance and instance.status == 'COMPLETED':
             raise serializers.ValidationError(
@@ -276,30 +296,39 @@ class ReservationUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def update(self, instance, validated_data):
-        """
-        Update reservation status and handle slot status changes.
-        """
         old_status = instance.status
         new_status = validated_data.get('status', instance.status)
-        
         instance.status = new_status
         instance.save()
 
         slot = instance.parking_slot
-        if new_status in ['CANCELLED', 'COMPLETED', 'EXPIRED']:
-            now = timezone.now()
-            has_active_reservations = Reservation.objects.filter(
-                parking_slot=slot,
-                start_time__lte=now,
-                end_time__gte=now,
-                status__in=['PENDING', 'CONFIRMED']
-            ).exclude(id=instance.id).exists()
-            
-            if not has_active_reservations:
+        now = timezone.now()
+        confirmed_res = Reservation.objects.filter(
+            parking_slot=slot,
+            status='CONFIRMED',
+            end_time__gte=now
+        ).order_by('start_time').first()
+        if confirmed_res:
+            if now < confirmed_res.start_time:
                 slot.is_reserved = False
-                slot.save()
-        elif new_status == 'CONFIRMED':
-            slot.is_reserved = True
-            slot.save()
-        
+                slot.is_occupied = False
+            elif confirmed_res.start_time <= now <= confirmed_res.end_time:
+                slot.is_reserved = True
+                slot.is_occupied = True
+            else:
+                slot.is_reserved = False
+                slot.is_occupied = False
+        else:
+            pending_res = Reservation.objects.filter(
+                parking_slot=slot,
+                status='PENDING',
+                end_time__gte=now
+            ).order_by('start_time').first()
+            if pending_res:
+                slot.is_reserved = False
+                slot.is_occupied = False
+            else:
+                slot.is_reserved = False
+                slot.is_occupied = False
+        slot.save()
         return instance 

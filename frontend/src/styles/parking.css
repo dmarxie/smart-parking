@@ -35,6 +35,29 @@
   cursor: not-allowed;
 }
 
+.parking-slot.completed {
+  background-color: #0b0b0b;
+  border: 2px solid #151515;
+  color: white;
+}
+
+.parking-slot.completed .badge {
+  background-color: #151515 !important;
+  color: white;
+}
+
+.parking-slot.confirmed {
+  background-color: #c6ddff;
+  border: 2px solid #0a58ca;
+  color: white;
+  cursor: not-allowed;
+}
+
+.parking-slot.confirmed .badge {
+  background-color: #0a58ca !important;
+  color: white;
+}
+
 .slot-number {
   font-size: 1.5rem;
   font-weight: bold;
@@ -59,59 +82,27 @@
   font-weight: 500;
 }
 
-@media (max-width: 768px) {
-  .parking-slot {
-    height: 100px;
-  }
-
-  .slot-number {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .parking-slot {
-    height: 90px;
-  }
-
-  .slot-number {
-    font-size: 1rem;
-  }
-}
-
-.location-name {
+.dark-mode-card {
   background-color: var(--bs-dark);
   border: none;
   border-radius: 0.5rem;
 }
 
-.location-name .card-body {
+.dark-mode-card .card-body {
   padding: 1.5rem;
 }
 
-.location-name h1 {
+.dark-mode-card h1 {
   color: var(--bs-light);
   margin-bottom: 0.5rem;
 }
 
-.location-name p {
+.dark-mode-card p {
   color: var(--bs-gray-400);
   margin-bottom: 0;
 }
 
-@media (min-width: 768px) {
-  .parking-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  .parking-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-/* Pagination Styles */
+/* pagination styles */
 .dark-pagination .page-link {
   background-color: #0b0b0b;
   border-color: #2c2c2c;
@@ -135,4 +126,33 @@
   background-color: #0b0b0b;
   border-color: #2c2c2c;
   color: #6c757d;
+}
+
+@media (max-width: 480px) {
+  .parking-slot {
+    height: 90px;
+  }
+
+  .slot-number {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .parking-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .parking-slot {
+    height: 100px;
+  }
+
+  .slot-number {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .parking-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
