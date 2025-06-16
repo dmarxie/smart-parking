@@ -3,7 +3,53 @@ $secondary: #ffffff;
 
 @import 'bootstrap/scss/bootstrap';
 
-// admin layout styles
+/* theme styles */
+.dark-mode-card {
+  background-color: #0b0b0b;
+  border: 2px solid #151515;
+  border-radius: 12px;
+  color: white;
+}
+
+/* component styles */
+.login-form,
+.register-form {
+  background-color: #0b0b0b;
+  border: 1px solid #151515;
+  border-radius: 24px;
+  color: white;
+}
+
+.homepage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 24px;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.homepage-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.homepage--login-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.welcome-title {
+  color: #ffffff;
+  font-size: 58px;
+  font-weight: 600;
+}
+
+/* admin layout styles */
 .admin-layout {
   display: flex;
   height: 100%;
@@ -17,7 +63,7 @@ $secondary: #ffffff;
   }
 }
 
-// admin sidebar styles
+/* admin sidebar styles */
 .admin-sidebar {
   width: 250px;
   height: calc(100% - 48px);
@@ -62,68 +108,7 @@ $secondary: #ffffff;
   }
 }
 
-// responsive sidebar
-@media (max-width: 768px) {
-  .admin-sidebar {
-    margin: 0;
-    border-radius: 0;
-    height: 100vh;
-    transform: translateX(-100%) !important;
-
-    &.show {
-      transform: translateX(0) !important;
-    }
-  }
-
-  .admin-content {
-    padding: 12px;
-    margin-left: 0 !important;
-  }
-
-  .sidebar-toggle {
-    display: block !important;
-  }
-}
-
-// logout modal styles
-.logout-modal {
-  .modal-content {
-    background-color: #0b0b0b;
-    border: 1px solid #151515;
-    color: white;
-  }
-
-  .modal-header {
-    .btn-close {
-      filter: invert(1) grayscale(100%) brightness(200%);
-    }
-  }
-
-  .modal-footer {
-    .btn-secondary {
-      background-color: #151515;
-      border-color: #151515;
-      color: white;
-
-      &:hover {
-        background-color: #252525;
-        border-color: #252525;
-      }
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-      border-color: #dc3545;
-
-      &:hover {
-        background-color: #bb2d3b;
-        border-color: #bb2d3b;
-      }
-    }
-  }
-}
-
-// location cards
+/* location cards */
 .location-card {
   background-color: #0b0b0b;
   border: 1px solid #151515;
@@ -170,7 +155,7 @@ $secondary: #ffffff;
   }
 }
 
-// profile dropdown styles
+/* profile dropdown styles */
 .dropdown-menu {
   background-color: #0b0b0b;
   border: 1px solid #151515;
@@ -209,7 +194,7 @@ $secondary: #ffffff;
   }
 }
 
-// basic user dashboard styles
+/* basic user dashboard styles */
 .dashboard-container {
   display: grid;
   grid-template-columns: 4fr 4fr;
@@ -261,7 +246,7 @@ $secondary: #ffffff;
   }
 }
 
-// profile button styles
+/* profile button styles */
 .btn-outline-light {
   border-color: #151515;
   color: white;
@@ -278,13 +263,6 @@ $secondary: #ffffff;
   i {
     font-size: 1.1rem;
   }
-}
-
-.dark-mode-card {
-  background-color: #0b0b0b;
-  border: 2px solid #151515;
-  border-radius: 12px;
-  color: white;
 }
 
 /* tab styles */
@@ -306,7 +284,7 @@ $secondary: #ffffff;
   border-color: var(--bs-primary);
 }
 
-// reservation container styles
+/* reservation container styles */
 .reservations-container {
   max-height: calc(100vh - 210px);
   overflow-y: auto;
@@ -319,4 +297,39 @@ $secondary: #ffffff;
 
 .reservations-container::-webkit-scrollbar {
   display: none;
+}
+
+/* responsive styles */
+@media (max-width: 992px) {
+  .homepage {
+    display: flex;
+  }
+  .homepage-image {
+    display: none;
+  }
+  .welcome-title {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    transform: translateX(-100%) !important;
+
+    &.show {
+      transform: translateX(0) !important;
+    }
+  }
+
+  .admin-content {
+    padding: 12px;
+    margin-left: 0 !important;
+  }
+
+  .sidebar-toggle {
+    display: block !important;
+  }
 }
