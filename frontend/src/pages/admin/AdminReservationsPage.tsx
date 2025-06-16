@@ -1,47 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button, Card, Col, Row, Badge, Tabs, Tab } from 'react-bootstrap';
-import { useAuth } from '../../contexts/AuthContext';
-import { Sidebar } from '../../components/admin/Sidebar';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { format } from 'date-fns';
-
-interface Reservation {
-  id: number;
-  user: {
-    email: string;
-  };
-  user_email: string;
-  parking_slot: number;
-  location_name: string;
-  slot_number: string;
-  start_time: string;
-  end_time: string;
-  vehicle_plate: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'EXPIRED';
-  created_at: string;
-  can_be_cancelled: boolean;
-}
-
-interface PaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Reservation[];
-}
+import { useAuth } from '../../contexts/AuthContext';
+import { Sidebar } from '../../components/admin';
+import type { Reservation, PaginatedResponse } from '../../types/reservation';
 
 /**
- * Admin dashboard page for managing parking reservations
+ * Admin reservations page
  *
  * @returns {React.ReactNode}
  */
 export function AdminReservationsPage() {
   const { token } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('pending');
+  const queryClient = useQueryClient();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending');
   const [allReservations, setAllReservations] = useState<Reservation[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -62,7 +39,7 @@ export function AdminReservationsPage() {
     },
   });
 
-  // mutations for updating reservation status
+  // mutations
   const confirmMutation = useMutation({
     mutationFn: async (reservationId: number) => {
       try {
@@ -147,9 +124,9 @@ export function AdminReservationsPage() {
     },
   });
 
+  // effects]
   /**
-   * Effect to automatically update reservation statuses based on time
-   * Checks every second and updates statuses for expired and completed reservations
+   * automatically update reservation statuses based on time
    *
    */
   useEffect(() => {
@@ -176,7 +153,7 @@ export function AdminReservationsPage() {
   }, []);
 
   /**
-   * Effect to load all reservations including paginated data
+   * load all reservations
    *
    */
   useEffect(() => {
@@ -210,8 +187,7 @@ export function AdminReservationsPage() {
   }, [reservationsData, token]);
 
   /**
-   * Effect to handle sidebar click outside on mobile
-   * Closes sidebar when clicking outside on mobile devices
+   * handle sidebar click outside on mobile
    *
    */
   useEffect(() => {
@@ -234,11 +210,12 @@ export function AdminReservationsPage() {
     };
   }, [sidebarOpen]);
 
-  // Helper functions
+  // helper functions
   /**
-   * Returns a badge component with appropriate styling based on reservation status
-   * @param reservation - The reservation object
-   * @returns Badge component with status
+   * get status badge
+   *
+   * @param reservation
+   * @returns
    */
   const getStatusBadge = (reservation: Reservation) => {
     const now = new Date();
@@ -271,7 +248,7 @@ export function AdminReservationsPage() {
   };
 
   /**
-   * Filters and sorts reservations based on the active tab
+   * filter reservations by status
    *
    * @param reservations
    * @returns
@@ -313,7 +290,7 @@ export function AdminReservationsPage() {
   };
 
   /**
-   * Renders reservation cards in a grid layout
+   * render reservation cards
    *
    * @param reservations
    * @returns

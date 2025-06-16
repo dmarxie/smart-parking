@@ -1,34 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Card, Col, Container, Row, Button, Modal, Form } from 'react-bootstrap';
+import { Button, Card, Col, Container, Form, Modal, Row } from 'react-bootstrap';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../../components/admin/Sidebar';
-
-interface Location {
-  id: number;
-  name: string;
-  address: string;
-  total_slots: number;
-  available_slots: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface AddLocationData {
-  name: string;
-  address: string;
-  total_slots: number;
-  is_active: boolean;
-}
-
-interface LocationsPaginatedResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: Location[];
-}
+import { Sidebar } from '../../components/admin';
+import type { AddLocationData, Location, LocationsPaginatedResponse } from '../../types/location';
 
 /**
  * Admin locations page
@@ -36,11 +11,10 @@ interface LocationsPaginatedResponse {
  * @returns {React.ReactNode}
  */
 export function AdminLocationsPage() {
-  const navigate = useNavigate();
+  // hooks
   const queryClient = useQueryClient();
   const contentRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -59,11 +33,7 @@ export function AdminLocationsPage() {
     is_active: true,
   });
 
-  /**
-   * Get locations data
-   *
-   * @returns {LocationsPaginatedResponse}
-   */
+  // data fetching
   const { data: locationsData, isLoading } = useQuery({
     queryKey: ['locations'],
     queryFn: async () => {
@@ -74,11 +44,7 @@ export function AdminLocationsPage() {
     },
   });
 
-  /**
-   * Add location mutation
-   *
-   * @returns {void}
-   */
+  // mutations
   const addLocation = useMutation({
     mutationFn: async (data: AddLocationData) => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/locations/`, data);
@@ -91,11 +57,6 @@ export function AdminLocationsPage() {
     },
   });
 
-  /**
-   * Update location mutation
-   *
-   * @returns {void}
-   */
   const updateLocation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: AddLocationData }) => {
       const response = await axios.put(
@@ -111,11 +72,6 @@ export function AdminLocationsPage() {
     },
   });
 
-  /**
-   * Delete location mutation
-   *
-   * @returns {void}
-   */
   const deleteLocation = useMutation({
     mutationFn: async (id: number) => {
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/locations/${id}/`);
@@ -127,6 +83,11 @@ export function AdminLocationsPage() {
     },
   });
 
+  // effects
+  /**
+   * handle sidebar click outside on mobile
+   *
+   */
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (window.innerWidth <= 768 && sidebarOpen) {
@@ -147,34 +108,12 @@ export function AdminLocationsPage() {
     };
   }, [sidebarOpen]);
 
-  /**
-   * Handle submit
-   *
-   * @param {React.FormEvent} e
-   * @returns {void}
-   */
+  // event handlers
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     addLocation.mutate(formData);
   };
 
-  /**
-   * Handle location click and navigate to slots page
-   *
-   * @param {number} locationId
-   * @returns {void}
-   */
-  const handleLocationClick = (locationId: number) => {
-    navigate(`/admin/locations/${locationId}/slots`);
-  };
-
-  /**
-   * Handle edit location
-   *
-   * @param {React.MouseEvent} e
-   * @param {Location} location
-   * @returns {void}
-   */
   const handleEditClick = (e: React.MouseEvent, location: Location) => {
     e.stopPropagation();
     setSelectedLocation(location);
@@ -187,25 +126,12 @@ export function AdminLocationsPage() {
     setShowEditModal(true);
   };
 
-  /**
-   * Handle delete location
-   *
-   * @param {React.MouseEvent} e
-   * @param {Location} location
-   * @returns {void}
-   */
   const handleDeleteClick = (e: React.MouseEvent, location: Location) => {
     e.stopPropagation();
     setSelectedLocation(location);
     setShowDeleteModal(true);
   };
 
-  /**
-   * Handle edit submission
-   *
-   * @param {React.FormEvent} e
-   * @returns {void}
-   */
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedLocation) {
@@ -213,17 +139,13 @@ export function AdminLocationsPage() {
     }
   };
 
-  /**
-   * Handle delete confirmation
-   *
-   * @returns {void}
-   */
   const handleDeleteConfirm = () => {
     if (selectedLocation) {
       deleteLocation.mutate(selectedLocation.id);
     }
   };
 
+  // loading state
   if (isLoading) {
     return (
       <Container className="py-4">
@@ -232,12 +154,20 @@ export function AdminLocationsPage() {
     );
   }
 
+  // data normalization
   const locations = Array.isArray(locationsData) ? locationsData : [];
 
   return (
     <div className="admin-layout">
       <Sidebar ref={sidebarRef} className={sidebarOpen ? 'show' : ''} />
-      <Container className="admin-content">
+      <Container ref={contentRef} className="admin-content">
+        <Button
+          variant="outline-light"
+          className="sidebar-toggle d-md-none mb-3"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
+        </Button>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1>Parking Locations</h1>
         </div>
@@ -265,11 +195,7 @@ export function AdminLocationsPage() {
             locations.map((location) => {
               return (
                 <Col key={location.id} xs={12} md={6} lg={4}>
-                  <Card
-                    className="h-100 location-card"
-                    onClick={() => handleLocationClick(location.id)}
-                    style={{ minHeight: '200px' }}
-                  >
+                  <Card className="h-100 location-card" style={{ minHeight: '200px' }}>
                     <Card.Body className="d-flex flex-column p-4">
                       <div className="d-flex justify-content-between align-items-start mb-3">
                         <Card.Title className="h5 mb-0">{location.name}</Card.Title>

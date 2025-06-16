@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import * as Yup from 'yup';
 import { Formik, Form, Field } from 'formik';
 import { useAuth } from '../../contexts/AuthContext';
+import type { LoginFormProps } from '../../types/auth';
 
 /**
  * Validation schema for the login form
@@ -17,20 +18,16 @@ const loginSchema = Yup.object().shape({
     .min(8, 'Password must be at least 8 characters'),
 });
 
-interface LoginFormProps {
-  isAdmin?: boolean;
-}
-
 /**
  * Login form component
  *
  * @param {LoginFormProps} props
- * @returns Login form component
+ *
+ * @returns {React.ReactNode}
  */
 export function LoginForm({ isAdmin = false }: LoginFormProps) {
   const { login } = useAuth();
   const navigate = useNavigate();
-
   const location = useLocation();
   const isAdminRoute = location.pathname === '/admin/login';
   const [showPassword, setShowPassword] = useState(false);
