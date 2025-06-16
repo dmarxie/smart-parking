@@ -1,5 +1,5 @@
 import { Button, Col, Container, Image } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import homepageImage from '../assets/images/homepage-bg.png';
 
 /**
@@ -32,6 +32,10 @@ export function HomePage() {
             >
               Admin Login
             </Button>
+            <div className="auth-footer">
+              <p className="mb-0 text-subtitle-gray">Don't have an account?</p>
+              <Link to="/register">Register here</Link>
+            </div>
           </Col>
         </Container>
       </Container>
