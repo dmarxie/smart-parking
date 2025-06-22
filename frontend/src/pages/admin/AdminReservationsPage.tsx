@@ -35,7 +35,7 @@ export function AdminReservationsPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      return response.data as PaginatedResponse;
+      return response.data as PaginatedResponse<Reservation>;
     },
   });
 
@@ -171,7 +171,7 @@ export function AdminReservationsPage() {
               Authorization: `Bearer ${token}`,
             },
           });
-          const data = response.data as PaginatedResponse;
+          const data = response.data as PaginatedResponse<Reservation>;
           currentReservations = [...currentReservations, ...data.results];
           nextUrl = data.next;
         } catch (error) {
@@ -391,38 +391,40 @@ export function AdminReservationsPage() {
           <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`}></i>
         </Button>
         <h1 className="mb-4 text-start">Reservations</h1>
-        <Tabs
-          activeKey={activeTab}
-          onSelect={(k) => setActiveTab(k || 'pending')}
-          className="d-flex gap-2 mb-4"
-          variant="pills"
-        >
-          <Tab eventKey="pending" title="Pending">
-            <div className="reservations-container">
-              {renderReservationCards(filterReservationsByStatus(allReservations))}
-            </div>
-          </Tab>
-          <Tab eventKey="confirmed" title="Confirmed">
-            <div className="reservations-container">
-              {renderReservationCards(filterReservationsByStatus(allReservations))}
-            </div>
-          </Tab>
-          <Tab eventKey="completed" title="Completed">
-            <div className="reservations-container">
-              {renderReservationCards(filterReservationsByStatus(allReservations))}
-            </div>
-          </Tab>
-          <Tab eventKey="cancelled" title="Cancelled">
-            <div className="reservations-container">
-              {renderReservationCards(filterReservationsByStatus(allReservations))}
-            </div>
-          </Tab>
-          <Tab eventKey="expired" title="Expired">
-            <div className="reservations-container">
-              {renderReservationCards(filterReservationsByStatus(allReservations))}
-            </div>
-          </Tab>
-        </Tabs>
+        <div className="reservations-container">
+          <Tabs
+            activeKey={activeTab}
+            onSelect={(k) => setActiveTab(k || 'pending')}
+            className="d-flex gap-2 mb-4"
+            variant="pills"
+          >
+            <Tab eventKey="pending" title="Pending">
+              <div className="reservations-container">
+                {renderReservationCards(filterReservationsByStatus(allReservations))}
+              </div>
+            </Tab>
+            <Tab eventKey="confirmed" title="Confirmed">
+              <div className="reservations-container">
+                {renderReservationCards(filterReservationsByStatus(allReservations))}
+              </div>
+            </Tab>
+            <Tab eventKey="completed" title="Completed">
+              <div className="reservations-container">
+                {renderReservationCards(filterReservationsByStatus(allReservations))}
+              </div>
+            </Tab>
+            <Tab eventKey="cancelled" title="Cancelled">
+              <div className="reservations-container">
+                {renderReservationCards(filterReservationsByStatus(allReservations))}
+              </div>
+            </Tab>
+            <Tab eventKey="expired" title="Expired">
+              <div className="reservations-container">
+                {renderReservationCards(filterReservationsByStatus(allReservations))}
+              </div>
+            </Tab>
+          </Tabs>
+        </div>
         {isLoadingMore && (
           <div className="text-center py-3">
             <div className="spinner-border text-light" role="status">

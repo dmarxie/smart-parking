@@ -203,159 +203,161 @@ export function AdminDashboard() {
         </Button>
         <h1 className="mb-4 text-start">Dashboard</h1>
 
-        <Row className="g-4">
-          {/* Reservation Stats */}
-          <Col md={6}>
-            <Card className="h-100 user-card">
-              <Card.Body>
-                <div className="d-flex flex-column gap-4">
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-calendar-check"></i>
+        <div className="reservations-container">
+          <Row className="g-4">
+            {/* Reservation Stats */}
+            <Col md={6}>
+              <Card className="h-100 user-card">
+                <Card.Body>
+                  <div className="d-flex flex-column gap-4">
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-calendar-check"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Total Reservations Today</h6>
+                              <h3 className="text-start mb-0">{reservationStats.total}</h3>
+                            </div>
                           </div>
-                          <div>
-                            <h6 className="text-start mb-1">Total Reservations Today</h6>
-                            <h3 className="text-start mb-0">{reservationStats.total}</h3>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-clock"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Pending Reservations</h6>
+                              <h3 className="text-start mb-0">{reservationStats.pending}</h3>
+                            </div>
                           </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
+                        </Card.Body>
+                      </Card>
+                    </div>
                   </div>
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-clock"></i>
-                          </div>
-                          <div>
-                            <h6 className="text-start mb-1">Pending Reservations</h6>
-                            <h3 className="text-start mb-0">{reservationStats.pending}</h3>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
+                </Card.Body>
+              </Card>
+            </Col>
 
-          {/* Location Stats */}
-          <Col md={6}>
-            <Card className="h-100 user-card">
-              <Card.Body>
-                <div className="d-flex flex-column gap-4">
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-geo-alt"></i>
+            {/* Location Stats */}
+            <Col md={6}>
+              <Card className="h-100 user-card">
+                <Card.Body>
+                  <div className="d-flex flex-column gap-4">
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-geo-alt"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Active Locations</h6>
+                              <h3 className="text-start mb-0">{locationStats.active}</h3>
+                            </div>
                           </div>
-                          <div>
-                            <h6 className="text-start mb-1">Active Locations</h6>
-                            <h3 className="text-start mb-0">{locationStats.active}</h3>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-p-square"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Available Slots</h6>
+                              <h3 className="text-start mb-0">
+                                {locationStats.availableSlots}/{locationStats.totalSlots}
+                              </h3>
+                            </div>
                           </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
+                        </Card.Body>
+                      </Card>
+                    </div>
                   </div>
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-p-square"></i>
-                          </div>
-                          <div>
-                            <h6 className="text-start mb-1">Available Slots</h6>
-                            <h3 className="text-start mb-0">
-                              {locationStats.availableSlots}/{locationStats.totalSlots}
-                            </h3>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
+                </Card.Body>
+              </Card>
+            </Col>
 
-          {/* Additional Stats */}
-          <Col md={12}>
-            <Card className="h-100 user-card">
-              <Card.Body>
-                <div className="d-flex flex-column gap-4">
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-check-circle"></i>
+            {/* Additional Stats */}
+            <Col md={12}>
+              <Card className="h-100 user-card">
+                <Card.Body>
+                  <div className="d-flex flex-column gap-4">
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-check-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Confirmed Reservations</h6>
+                              <h3 className="text-start mb-0">{reservationStats.confirmed}</h3>
+                            </div>
                           </div>
-                          <div>
-                            <h6 className="text-start mb-1">Confirmed Reservations</h6>
-                            <h3 className="text-start mb-0">{reservationStats.confirmed}</h3>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-x-circle"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Cancelled Reservations</h6>
+                              <h3 className="text-start mb-0">{reservationStats.cancelled}</h3>
+                            </div>
                           </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-check2-all"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Completed Reservations</h6>
+                              <h3 className="text-start mb-0">{reservationStats.completed}</h3>
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </div>
+                    <div className="w-100">
+                      <Card className="h-100 stat-card">
+                        <Card.Body>
+                          <div className="d-flex align-items-center gap-3">
+                            <div className="stat-icon">
+                              <i className="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                              <h6 className="text-start mb-1">Expired Reservations</h6>
+                              <h3 className="text-start mb-0">{reservationStats.expired}</h3>
+                            </div>
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </div>
                   </div>
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-x-circle"></i>
-                          </div>
-                          <div>
-                            <h6 className="text-start mb-1">Cancelled Reservations</h6>
-                            <h3 className="text-start mb-0">{reservationStats.cancelled}</h3>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-check2-all"></i>
-                          </div>
-                          <div>
-                            <h6 className="text-start mb-1">Completed Reservations</h6>
-                            <h3 className="text-start mb-0">{reservationStats.completed}</h3>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                  <div className="w-100">
-                    <Card className="h-100 stat-card">
-                      <Card.Body>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="stat-icon">
-                            <i className="bi bi-clock-history"></i>
-                          </div>
-                          <div>
-                            <h6 className="text-start mb-1">Expired Reservations</h6>
-                            <h3 className="text-start mb-0">{reservationStats.expired}</h3>
-                          </div>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </div>
       </div>
     </div>
   );
